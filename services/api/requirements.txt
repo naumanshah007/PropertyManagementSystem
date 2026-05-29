@@ -1,0 +1,18 @@
+fastapi==0.115.6
+pdfplumber==0.11.5
+PyMuPDF==1.25.1
+python-multipart==0.0.20
+httpx==0.28.1
+pytest==8.3.4
+uvicorn[standard]==0.34.0
+# LLM provider SDKs for Phase C register extraction.
+# Imports in app.llm_extractor are lazy so each one is optional at runtime —
+# install only the providers you intend to enable.
+anthropic>=0.39.0
+openai>=1.50.0
+google-genai>=0.3.0
+# Production persistence: Turso (libsql) for structured records, R2 (S3) for blobs.
+# Both are optional at runtime — only used when DATABASE_PROVIDER=turso /
+# FILE_STORAGE_PROVIDER=r2. Imports are lazy so json/local mode needs neither.
+libsql-client>=0.3.1
+boto3>=1.34.0

@@ -1,0 +1,195 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: #040814;
+  color: #e6edf7;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+input,
+select,
+textarea {
+  background-color: rgba(7, 13, 28, 0.6);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #e6edf7;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #64748b;
+}
+
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-cyan-300/60 focus:ring-offset-2 focus:ring-offset-night-900;
+}
+
+/* ------------------------------------------------------------------
+   Global surface remap. Most pages use `bg-white` for card surfaces;
+   we repaint that into a dark glass panel so the existing markup
+   inherits the new theme without per-file edits.
+   ------------------------------------------------------------------ */
+@layer utilities {
+  .bg-white {
+    background-color: rgba(7, 13, 28, 0.72) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  /* Subtle hover slates remap to glass hover */
+  .hover\:bg-slate-50:hover {
+    background-color: rgba(255, 255, 255, 0.06) !important;
+  }
+  .bg-slate-50,
+  .bg-slate-100 {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+  }
+  /* Dark slate text on now-dark surfaces would be invisible — lift to readable */
+  .text-slate-700,
+  .text-slate-800,
+  .text-slate-900,
+  .text-gray-700,
+  .text-gray-800,
+  .text-gray-900,
+  .text-zinc-700,
+  .text-zinc-800,
+  .text-zinc-900 {
+    color: #e6edf7 !important;
+  }
+  .text-slate-500,
+  .text-slate-600,
+  .text-gray-500,
+  .text-gray-600,
+  .text-zinc-500,
+  .text-zinc-600 {
+    color: #94a3b8 !important;
+  }
+  .border-slate-200,
+  .border-slate-300,
+  .border-gray-200,
+  .border-gray-300 {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  /* `ink` is now a light text token, so legacy `bg-ink` buttons (dark CTA
+     in the old light theme) must be repainted as the gradient primary so
+     their white text stays legible. Handles all primary buttons at once. */
+  .bg-ink {
+    background-color: transparent !important;
+    background-image: linear-gradient(135deg, #22d3ee 0%, #8b5cf6 100%) !important;
+    color: #040814 !important;
+    box-shadow: 0 0 28px -6px rgba(34, 211, 238, 0.55);
+  }
+  .bg-ink.text-white,
+  .bg-ink .text-white {
+    color: #040814 !important;
+  }
+  .hover\:bg-graphite:hover {
+    background-image: linear-gradient(135deg, #06b6d4 0%, #7c3aed 100%) !important;
+  }
+  /* Disabled CTAs should read as inert glass, not a glowing gradient */
+  .bg-ink:disabled {
+    background-image: none !important;
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    color: #64748b !important;
+    box-shadow: none;
+  }
+  .border-ink {
+    border-color: rgba(34, 211, 238, 0.4) !important;
+  }
+
+  /* Pastel notice/banner surfaces (`bg-*-50` + dark `text-*-900`) from the
+     light theme → dark-tinted glass notices so they sit on the navy base. */
+  .bg-amber-50,
+  .bg-amber-50\/60,
+  .bg-amber-50\/45 {
+    background-color: rgba(251, 191, 36, 0.1) !important;
+  }
+  .bg-emerald-50,
+  .bg-green-50 {
+    background-color: rgba(52, 211, 153, 0.1) !important;
+  }
+  .bg-rose-50,
+  .bg-rose-50\/60 {
+    background-color: rgba(251, 113, 133, 0.1) !important;
+  }
+  .bg-sky-50,
+  .bg-blue-50 {
+    background-color: rgba(56, 189, 248, 0.1) !important;
+  }
+  .bg-violet-50 {
+    background-color: rgba(167, 139, 250, 0.1) !important;
+  }
+  .bg-orange-50 {
+    background-color: rgba(251, 146, 60, 0.1) !important;
+  }
+  .text-amber-900,
+  .text-amber-950 {
+    color: #fcd9a3 !important;
+  }
+  .text-emerald-900,
+  .text-green-900 {
+    color: #a7f3cf !important;
+  }
+  .text-rose-900,
+  .text-rose-950 {
+    color: #fdc5cd !important;
+  }
+  .text-sky-900,
+  .text-blue-900 {
+    color: #bae3fd !important;
+  }
+  .text-violet-900 {
+    color: #ddd0fc !important;
+  }
+  .text-orange-900 {
+    color: #fdd2ad !important;
+  }
+}
+
+/* Reusable design-system primitives */
+@layer components {
+  .glass-card {
+    @apply rounded-2xl border border-white/10 bg-night-800/70 backdrop-blur-md shadow-panel;
+  }
+  .glass-card-soft {
+    @apply rounded-xl border border-white/10 bg-white/[0.04] backdrop-blur-md;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-grad-primary px-4 py-2 text-sm font-semibold text-night-900 shadow-glow transition hover:shadow-glow-violet;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-ink backdrop-blur transition hover:bg-white/10;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold;
+  }
+  .surface-grid {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+}

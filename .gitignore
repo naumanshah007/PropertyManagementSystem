@@ -1,0 +1,50 @@
+.DS_Store
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.env
+*.key
+*.pem
+*.p12
+*.pfx
+*.token
+.turso/
+.vercel/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+tsconfig.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local logs
+*.log
+
+# Local databases and POC storage
+services/api/storage/
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploaded/generated documents
+services/api/**/*.pdf
+tests/*.pdf
+**/uploads/**
+**/exports/**
+
+# Approved demo fixtures
+!samples/surveys/38-Asbestos-Survey-_Rev_0.pdf
+!samples/**/.gitkeep
+!tests/**/.gitkeep

@@ -1,0 +1,56 @@
+services:
+  - type: web
+    name: tracequote-api
+    runtime: docker
+    plan: starter           # "starter" or higher is required for a persistent disk
+    healthCheckPath: /health
+    # Persistent disk so JSON/local artifacts (and the json DB fallback) survive
+    # redeploys. DATA_DIR points the app's storage root here.
+    disk:
+      name: tracequote-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: APP_ENV
+        value: staging
+      - key: FRONTEND_URL
+        value: https://quote.privexa.co
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://quote.privexa.co
+      - key: DATA_DIR
+        value: /data
+      # --- Persistence backends -------------------------------------------
+      # Turso for structured records (orgs/pricebooks/jobs). Set the two
+      # TURSO_* secrets below. Use "json" to rely on the persistent disk instead.
+      - key: DATABASE_PROVIDER
+        value: turso
+      # R2 for the client-facing export deliverables. Set the R2_* secrets
+      # below. Use "local" to keep exports on the persistent disk instead.
+      - key: FILE_STORAGE_PROVIDER
+        value: r2
+      # Demo login + seeding for the hosted demo. Set "false" to lock down.
+      - key: DEMO_SEED_ENABLED
+        value: "true"
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "480"
+      # --- Secrets: set these in the Render dashboard (sync:false = not in git) ---
+      - key: AUTH_SECRET                 # REQUIRED — strong random string
+        sync: false
+      - key: DEMO_ADMIN_PASSWORD         # demo platform-admin login
+        sync: false
+      - key: DEMO_ORG_ADMIN_PASSWORD     # demo org-admin login
+        sync: false
+      - key: TURSO_DATABASE_URL          # libsql://<db>-<org>.turso.io
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+      - key: R2_PUBLIC_BASE_URL          # optional; presigned URLs used if unset
+        sync: false

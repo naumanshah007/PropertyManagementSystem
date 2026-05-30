@@ -12,7 +12,7 @@ Turso, Cloudflare, DNS) are yours — they require your credentials.**
 - **Repository abstraction** (`app/repository.py`) — structured records (orgs, settings, profiles, pricebooks, org users, auth users, **jobs**) go through `get_repository()`. Two backends, chosen by `DATABASE_PROVIDER`:
   - `json` (default) — original on-disk layout under `DATA_DIR`.
   - `turso` — libsql/SQLite aggregate rows (migration `002_jobs_and_aggregates.sql`). Schema auto-applies on first use; demo org/users seed on first login when `DEMO_SEED_ENABLED=true`.
-- **R2** (`app/file_storage.py::R2FileStorage`, boto3) — `FILE_STORAGE_PROVIDER=r2` pushes the client-facing export PDF/HTML to R2 and serves a presigned/public URL (the `/export-quote/pdf` endpoint redirects). Intermediate JSON artifacts stay on the `DATA_DIR` disk (durable there).
+- **R2** (`app/file_storage.py::R2FileStorage`, boto3) — `FILE_STORAGE_PROVIDER=r2` mirrors original uploads and pushes the client-facing export PDF/HTML to R2, then serves a presigned/public export URL (the `/export-quote/pdf` endpoint redirects). Parsing still uses the local PDF copy on the mounted `DATA_DIR` disk; intermediate JSON artifacts also stay on that durable disk.
 - Both backends default to `json`/`local`, so local dev + the 172 backend tests are unchanged. `libsql-client` + `boto3` are lazy imports — only needed when their backend is enabled.
 
 ## Environment variables

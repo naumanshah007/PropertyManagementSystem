@@ -13,6 +13,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+from fastapi import UploadFile
 
 from auth_helpers import PLATFORM_ADMIN_HEADERS  # noqa: F401 (ensures APP_ENV=local)
 from app.file_storage import LocalFileStorage, R2FileStorage, get_file_storage
@@ -60,3 +61,35 @@ def test_r2_public_url_building(monkeypatch: pytest.MonkeyPatch) -> None:
     # Public base + sanitised key, no live S3 call needed.
     assert storage.get_download_url("/documents/x/exports/q.pdf") == "https://cdn.example.com/documents/x/exports/q.pdf"
     assert R2FileStorage._key("../../etc/passwd") == "etc/passwd" or ".." not in R2FileStorage._key("../../etc/passwd")
+
+
+def test_save_upload_keeps_local_parser_path_when_remote_storage_enabled(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import app.document_parser as parser
+
+    class RemoteStorage:
+        def __init__(self) -> None:
+            self.saved: dict[str, bytes] = {}
+
+        def save_upload(self, source, storage_key: str) -> str:
+            self.saved[storage_key] = source.read()
+            return storage_key
+
+    remote = RemoteStorage()
+    pdf_bytes = b"%PDF-1.7\n% test upload"
+    monkeypatch.setattr(parser, "STORAGE_ROOT", tmp_path / "organisations")
+    monkeypatch.setattr(parser, "get_file_storage", lambda root=None: remote)
+
+    document_id, local_path = parser.save_upload(
+        UploadFile(io.BytesIO(pdf_bytes), filename="demo.pdf"),
+        organisation_id="org-demo",
+    )
+
+    assert local_path == tmp_path / "organisations" / "org-demo" / "documents" / document_id / "demo.pdf"
+    assert local_path.exists()
+    assert local_path.read_bytes() == pdf_bytes
+    assert remote.saved == {
+        f"organisations/org-demo/documents/{document_id}/demo.pdf": pdf_bytes,
+    }

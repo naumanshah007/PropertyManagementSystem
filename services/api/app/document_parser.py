@@ -9,7 +9,7 @@ import fitz
 import pdfplumber
 from fastapi import UploadFile
 
-from .file_storage import get_file_storage
+from .file_storage import LocalFileStorage, get_file_storage
 from .schemas import ParsedDocument, ParsedPage, ParsedTable
 from .storage_paths import STORAGE_ROOT, atomic_write_text
 
@@ -74,11 +74,17 @@ def save_upload(file: UploadFile, organisation_id: str = DEFAULT_ORGANISATION_ID
     target_dir = _document_dir(document_id, organisation_id)
     target_dir.mkdir(parents=True, exist_ok=True)
     target_path = _original_path(document_id, file.filename or "uploaded.pdf", organisation_id)
+    storage_key = str(target_path.relative_to(STORAGE_ROOT.parent))
 
     try:
-        storage_key = str(target_path.relative_to(STORAGE_ROOT.parent))
-        saved_path = get_file_storage(STORAGE_ROOT.parent).save_upload(file.file, storage_key)
-        target_path = Path(saved_path)
+        # Parsing still needs a local PDF path. In hosted mode that path lives
+        # on the mounted DATA_DIR disk; optional object storage mirrors the
+        # original upload without replacing the local parser input.
+        target_path = Path(LocalFileStorage(STORAGE_ROOT.parent).save_upload(file.file, storage_key))
+        storage = get_file_storage(STORAGE_ROOT.parent)
+        if not isinstance(storage, LocalFileStorage):
+            with target_path.open("rb") as uploaded:
+                storage.save_upload(uploaded, storage_key)
     finally:
         file.file.close()
 

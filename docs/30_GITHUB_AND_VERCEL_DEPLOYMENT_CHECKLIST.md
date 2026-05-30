@@ -128,9 +128,8 @@ The frontend can deploy before the backend, but upload, extraction, pricing, rev
 
 ## Remaining Before Public Launch
 
-- [ ] Replace demo auth with production auth.
-- [ ] Complete server-side role enforcement.
-- [ ] Move runtime persistence from JSON mode to Turso or another managed database.
-- [ ] Complete Cloudflare R2 adapter for uploads and exported PDFs.
-- [ ] Add upload size limits and rate limits.
+- [ ] For a public launch, replace demo auth with production auth. For a controlled demo, set strong `AUTH_SECRET`, `DEMO_ADMIN_PASSWORD`, and `DEMO_ORG_ADMIN_PASSWORD` secrets.
+- [ ] Deploy with `DATABASE_PROVIDER=turso` and the Turso secrets from doc 31.
+- [ ] Deploy with `FILE_STORAGE_PROVIDER=r2` and the Cloudflare R2 secrets from doc 31.
+- [ ] Add API rate limits.
 - [ ] Add production monitoring and backup policy.

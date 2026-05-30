@@ -82,7 +82,23 @@ def test_tauraroa_full_vendor_demo_workflow_smoke() -> None:
     )
     assert exported.status_code == 200
     assert exported.json()["quote_number"] == "TQ-SMOKE-001"
-    assert "Source evidence appendix" in exported.json()["html_content"]
+    # The source-evidence appendix is an internal artifact — hidden from the
+    # client-facing quote unless the org explicitly enables it. (Re-export with
+    # the default-off template to assert the client-facing default deterministically.)
+    client.post(
+        "/organisations/org-demo-tracequote/settings",
+        json={"show_source_evidence_appendix": False},
+    )
+    clean = client.post(
+        f"/documents/{document_id}/export-quote",
+        json={
+            "client_name": "Tauraroa Area School",
+            "project_name": "Asbestos removal and demolition",
+            "site_address": "Tauraroa Area School, Northland, New Zealand",
+            "quote_number": "TQ-SMOKE-001",
+        },
+    )
+    assert "Source evidence appendix" not in clean.json()["html_content"]
 
     pdf = client.get(f"/documents/{document_id}/export-quote/pdf")
     assert pdf.status_code == 200

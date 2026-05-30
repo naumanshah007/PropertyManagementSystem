@@ -90,6 +90,12 @@ def test_export_succeeds_when_readiness_passes() -> None:
 def test_exported_package_contains_required_quote_content() -> None:
     priced = _priced_quote()
     _resolve_all_review_lines(priced)
+    # This test asserts the RAS-1285 "Estimate" layout + the (opt-in) evidence
+    # appendix, so configure the default org's template accordingly.
+    client.post(
+        "/organisations/org-demo-tracequote/settings",
+        json={"template_type": "ras_style", "show_source_evidence_appendix": True},
+    )
     response = client.post(f"/documents/{priced['document_id']}/export-quote")
     assert response.status_code == 200
 

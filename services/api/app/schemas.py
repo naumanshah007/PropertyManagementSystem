@@ -586,6 +586,7 @@ class CompanyProfile(BaseModel):
 
 
 LLMProvider = Literal["none", "anthropic", "openai", "gemini"]
+QuoteTemplateType = Literal["default", "ras_style"]
 
 
 class OrganisationSettings(BaseModel):
@@ -596,6 +597,17 @@ class OrganisationSettings(BaseModel):
     quote_prefix: str = "TQ"
     require_review_for_class_a: bool = True
     require_review_for_no_access: bool = True
+    # Client-facing quote template. "default" = generic TraceQuote layout (fallback);
+    # "ras_style" = RAS-1285 "Estimate" layout. The source-evidence appendix is an
+    # internal/audit artifact and is OFF in the client quote unless explicitly enabled.
+    template_type: QuoteTemplateType = "default"
+    template_name: str = "TraceQuote standard quote"
+    show_source_evidence_appendix: bool = False
+    show_review_statement: bool = True
+    default_email_message: str = (
+        "Please find attached your quote. Let us know if you have any questions."
+    )
+    terms_of_trade_text: str = ""
     # Branding for client-facing quote exports
     business_name: str = "Demo Asbestos Services Ltd"
     business_address_lines: list[str] = Field(default_factory=lambda: ["PO Box 000", "Auckland 1010"])
@@ -747,6 +759,12 @@ class UpsertOrganisationSettingsRequest(BaseModel):
     quote_inclusions: list[str] | None = None
     quote_important_notes: list[str] | None = None
     quote_required_services: list[str] | None = None
+    template_type: QuoteTemplateType | None = None
+    template_name: str | None = None
+    show_source_evidence_appendix: bool | None = None
+    show_review_statement: bool | None = None
+    default_email_message: str | None = None
+    terms_of_trade_text: str | None = None
 
 
 class CreatePricebookRequest(BaseModel):

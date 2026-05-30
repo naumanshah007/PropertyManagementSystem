@@ -267,6 +267,32 @@ export async function getQuoteExport(documentId: string): Promise<QuoteExportPac
   return response.json() as Promise<QuoteExportPackage>;
 }
 
+export async function getOrganisationSettings(
+  orgId: string,
+): Promise<import("./types").OrganisationSettings> {
+  const response = await apiFetch(`${API_BASE_URL}/organisations/${orgId}/settings`, { cache: "no-store" });
+  if (!response.ok) {
+    throw new ApiError(response.status, `Settings fetch failed (${response.status})`);
+  }
+  return response.json();
+}
+
+export async function updateOrganisationSettings(
+  orgId: string,
+  payload: import("./types").UpsertOrganisationSettingsPayload,
+): Promise<import("./types").OrganisationSettings> {
+  const response = await apiFetch(`${API_BASE_URL}/organisations/${orgId}/settings`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new ApiError(response.status, `Settings update failed (${response.status}): ${detail}`);
+  }
+  return response.json();
+}
+
 export async function listOrganisationPricebooks(orgId: string): Promise<Pricebook[]> {
   const response = await apiFetch(`${API_BASE_URL}/organisations/${orgId}/pricebooks`, {
     cache: "no-store",

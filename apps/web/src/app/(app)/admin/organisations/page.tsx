@@ -10,12 +10,21 @@ const organisations = [
     name: "TraceQuote Demo Organisation",
     role: "platform_admin",
     status: "active",
+    template: "Generic",
   },
   {
     id: "org-demo-asbestos-services",
     name: "Demo Asbestos Services Ltd",
     role: "organisation_admin",
     status: "active",
+    template: "Generic",
+  },
+  {
+    id: "org-revolve-demo",
+    name: "Revolve Asbestos Solutions Demo",
+    role: "organisation_admin",
+    status: "active",
+    template: "RAS-style",
   },
 ];
 
@@ -43,7 +52,11 @@ export default function OrganisationsPage() {
                 <div className="mt-1 text-sm text-graphite">{org.id}</div>
               </div>
               <div className="flex gap-2">
+                <RiskChip label={org.template} />
                 <RiskChip label={org.status} />
+                <Link href={`/admin/organisations/${org.id}/quote-template`} className="focus-ring rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink">
+                  Template
+                </Link>
                 <Link href={`/admin/organisations/${org.id}/settings`} className="focus-ring rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink">
                   Manage
                 </Link>

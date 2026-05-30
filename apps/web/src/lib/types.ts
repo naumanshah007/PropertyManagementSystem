@@ -471,6 +471,40 @@ export interface Pricebook {
 export type CreatePricebookRuleRequest = Omit<PricebookRule, "id" | "organisation_id">;
 export type UpdatePricebookRuleRequest = Partial<CreatePricebookRuleRequest>;
 
+export type QuoteTemplateType = "default" | "ras_style";
+
+export interface OrganisationSettings {
+  organisation_id: string;
+  gst_rate: number;
+  default_margin: number;
+  default_currency: string;
+  quote_prefix: string;
+  template_type: QuoteTemplateType;
+  template_name: string;
+  show_source_evidence_appendix: boolean;
+  show_review_statement: boolean;
+  default_email_message: string;
+  terms_of_trade_text: string;
+  business_name: string;
+  business_address_lines: string[];
+  business_email: string;
+  business_phone: string;
+  business_gst_number: string;
+  contact_name: string;
+  contact_phone: string;
+  quote_valid_days: number;
+  quote_intro_text: string;
+  quote_closing_text: string;
+  quote_inclusions: string[];
+  quote_important_notes: string[];
+  quote_required_services: string[];
+  updated_at: string;
+}
+
+export type UpsertOrganisationSettingsPayload = Partial<
+  Omit<OrganisationSettings, "organisation_id" | "updated_at">
+>;
+
 export type LLMProvider = "none" | "anthropic" | "openai" | "gemini";
 
 export interface LLMConfig {

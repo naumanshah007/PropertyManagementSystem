@@ -187,6 +187,19 @@ def _render_html(
     important_html = "".join(f"<li>{_e(item)}</li>" for item in settings.quote_important_notes)
     required_services_html = "".join(f"<li>{_e(item)}</li>" for item in settings.quote_required_services)
 
+    # Template type controls the client-facing framing. "ras_style" → "Estimate"
+    # (RAS-1285 layout); "default" → generic TraceQuote "Quote".
+    title_label = "Estimate" if settings.template_type == "ras_style" else "Quote"
+    subtitle_html = (
+        "" if settings.template_type == "ras_style"
+        else f'<p style="margin-top:-6px;color:#6b7280;font-size:11px;">Prepared by {_e(settings.business_name)}</p>'
+    )
+    review_statement_html = (
+        '<p style="margin:16px 0;padding:10px 14px;background:#ecfdf5;border-left:4px solid #10b981;font-size:11px;">'
+        "Every priced line in this quote has been reviewed and approved by a qualified estimator before issue.</p>"
+        if settings.show_review_statement else ""
+    )
+
     sections_html_parts: list[str] = []
     for section, lines in grouped:
         rows: list[str] = []
@@ -232,6 +245,21 @@ def _render_html(
         </tr>
         """
         for line in priced_lines
+    )
+    # The source-evidence appendix is an INTERNAL audit artifact. It is omitted
+    # from the client-facing quote unless the org explicitly enables it.
+    evidence_section_html = (
+        f"""
+  <section class="evidence-section">
+    <h2>Source evidence appendix</h2>
+    <p style="font-size:10px;color:#6b7280;">For audit and compliance. Every priced line above is traceable to the survey pages below.</p>
+    <table class="evidence">
+      <thead><tr><th>Quote line</th><th>Source pages</th><th>Evidence</th></tr></thead>
+      <tbody>{evidence_rows}</tbody>
+    </table>
+  </section>"""
+        if settings.show_source_evidence_appendix
+        else ""
     )
 
     business_address = "<br />".join(_e(line) for line in settings.business_address_lines)
@@ -305,7 +333,8 @@ def _render_html(
     <div><span class="meta-label">Currency:</span> {_e(settings.default_currency)}</div>
   </div>
 
-  <h1 class="estimate-title">Estimate | {_e(details.project_name)}</h1>
+  <h1 class="estimate-title">{title_label} | {_e(details.project_name)}</h1>
+  {subtitle_html}
   <p>{_e(settings.quote_intro_text)}</p>
 
   <h2>This pricing includes:</h2>
@@ -337,20 +366,14 @@ def _render_html(
 
   <p>{_e(settings.quote_closing_text)}</p>
 
+  {review_statement_html}
+
   <div class="signature">
     <p>Kind regards</p>
     <p class="name">{_e(settings.contact_name)}</p>
     <p>{_e(settings.contact_phone)}</p>
   </div>
-
-  <section class="evidence-section">
-    <h2>Source evidence appendix</h2>
-    <p style="font-size:10px;color:#6b7280;">For audit and compliance. Every priced line above is traceable to the survey pages below.</p>
-    <table class="evidence">
-      <thead><tr><th>Quote line</th><th>Source pages</th><th>Evidence</th></tr></thead>
-      <tbody>{evidence_rows}</tbody>
-    </table>
-  </section>
+{evidence_section_html}
 
   <div class="footer">
     Quote {_e(quote_number)} · Generated {_e(generated_at.isoformat(timespec='seconds'))} · Document {_e(document_id)}
@@ -379,7 +402,8 @@ def _render_pdf(
     page = _new_page(document)
     y = _pdf_header_block(page, quote_number, details, settings, generated_at, valid_until)
 
-    y = _pdf_text(page, f"Estimate | {details.project_name}", 48, y + 14, size=15, bold=True)
+    title_label = "Estimate" if settings.template_type == "ras_style" else "Quote"
+    y = _pdf_text(page, f"{title_label} | {details.project_name}", 48, y + 14, size=15, bold=True)
     y = _pdf_text(page, settings.quote_intro_text, 48, y + 6, size=9, width=500)
 
     y = _pdf_text(page, "This pricing includes:", 48, y + 14, size=11, bold=True, color=(0.13, 0.33, 0.28))

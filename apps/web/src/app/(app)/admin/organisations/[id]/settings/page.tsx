@@ -1,4 +1,4 @@
-import { Bot, ArrowRight } from "lucide-react";
+import { Bot, ArrowRight, FileSignature } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { Panel, PanelHeader } from "@/components/panel";
@@ -9,6 +9,28 @@ export default async function OrganisationSettingsPage({ params }: { params: Pro
   return (
     <div className="space-y-6">
       <PageHeader eyebrow="Organisation Admin" title="Organisation settings" description={`Settings boundary for ${id}.`} actions={<RiskChip label="Org scoped" />} />
+
+      <Link
+        href={`/admin/organisations/${id}/quote-template`}
+        className="focus-ring block rounded-lg border border-line bg-white p-5 shadow-sm hover:border-moss"
+      >
+        <div className="flex items-start gap-4">
+          <div className="rounded-md bg-moss/10 p-2">
+            <FileSignature className="h-5 w-5 text-moss" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-ink">Quote template & branding</h3>
+              <RiskChip label="Branded export" />
+            </div>
+            <p className="mt-1 text-sm text-graphite">
+              Choose the client-facing layout (generic TraceQuote or RAS-style estimate), edit inclusions, IMPORTANT notes,
+              required services, contact details, and preview the export.
+            </p>
+          </div>
+          <ArrowRight className="h-5 w-5 text-graphite" />
+        </div>
+      </Link>
 
       <Link
         href={`/admin/organisations/${id}/llm-settings`}

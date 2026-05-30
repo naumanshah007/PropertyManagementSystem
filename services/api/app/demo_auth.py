@@ -33,6 +33,9 @@ from .schemas import (
 
 
 TEST_ORGANISATION_ID = "org-demo-asbestos-services"
+# Private vendor-demo org that exports a RAS-1285-style estimate. Named/styled
+# after Revolve for the private demo only — not for public branding use.
+REVOLVE_ORGANISATION_ID = "org-revolve-demo"
 AUTH_DIR = STORAGE_ROOT / "demo_auth"
 AUTH_USERS_PATH = AUTH_DIR / "users.json"
 HASH_ITERATIONS = 120_000
@@ -157,6 +160,8 @@ def seed_demo_environment() -> dict[str, object]:
             ),
         )
 
+    seed_revolve_demo_org()
+
     existing_users = {user.email for user in load_demo_auth_users()}
     settings = get_settings()
     if not {settings.demo_admin_email, settings.demo_org_admin_email}.issubset(existing_users):
@@ -173,6 +178,48 @@ def seed_demo_environment() -> dict[str, object]:
         "demo_users": [user.email for user in load_demo_auth_users()],
         "pricebooks": len(list_pricebooks(TEST_ORGANISATION_ID)),
     }
+
+
+def seed_revolve_demo_org() -> str:
+    """Seed the private RAS-style vendor-demo organisation.
+
+    Creating the org auto-seeds the RAS-1285 starter pricebook. We then apply
+    the RAS-style company profile + quote template so its exports render as a
+    Revolve-format "Estimate" rather than the generic TraceQuote quote.
+    """
+    if get_organisation(REVOLVE_ORGANISATION_ID) is None:
+        create_organisation(
+            CreateOrganisationRequest(
+                name="Revolve Asbestos Solutions Demo",
+                slug="revolve-asbestos-demo",
+                trading_name="Revolve Asbestos Solutions Demo",
+                email="info@revolveasbestos.co.nz",
+            ),
+            org_id=REVOLVE_ORGANISATION_ID,
+        )
+
+    upsert_organisation_settings(
+        REVOLVE_ORGANISATION_ID,
+        UpsertOrganisationSettingsRequest(
+            gst_rate=0.15,
+            default_margin=0.20,
+            default_currency="NZD",
+            quote_prefix="RAS",
+            template_type="ras_style",
+            template_name="Revolve RAS-1285 estimate",
+            show_source_evidence_appendix=False,
+            show_review_statement=True,
+            business_name="Revolve Asbestos Solutions Demo",
+            business_address_lines=["PO Box 841", "Epsom", "Auckland 1051"],
+            business_email="info@revolveasbestos.co.nz",
+            business_phone="0800724720",
+            business_gst_number="139-221-346",
+            contact_name="Xavier Unkovich",
+            contact_phone="0800724720",
+            quote_valid_days=30,
+        ),
+    )
+    return REVOLVE_ORGANISATION_ID
 
 
 def _safe_org_users(org_id: str):

@@ -8,7 +8,7 @@ import { saveDemoSession } from "@/lib/demo-auth";
 export default function LoginPage() {
   const [email, setEmail] = useState("admin@privexa.co");
   const [password, setPassword] = useState("admin123");
-  const [message, setMessage] = useState("Use demo-only credentials for local mode.");
+  const [message, setMessage] = useState("Use the demo credentials for this hosted workspace.");
   const [submitting, setSubmitting] = useState(false);
 
   async function submit() {

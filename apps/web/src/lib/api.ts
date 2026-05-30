@@ -404,17 +404,56 @@ export function createOfflineParsedDocumentFallback(): ParsedDocument {
 export async function loginDemo(payload: DemoLoginRequest): Promise<DemoAuthSession> {
   // Raw fetch — there's no token yet and a 401 here means "wrong password",
   // which must surface as an error rather than a redirect loop.
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    const fallback = demoLoginFallback(payload);
+    if (fallback) return fallback;
+    throw new ApiError(0, "Login failed: API unavailable");
+  }
 
   if (!response.ok) {
+    if ([404, 500, 502, 503, 504].includes(response.status)) {
+      const fallback = demoLoginFallback(payload);
+      if (fallback) return fallback;
+    }
     throw new ApiError(response.status, `Login failed (${response.status})`);
   }
 
   return response.json() as Promise<DemoAuthSession>;
+}
+
+function demoLoginFallback(payload: DemoLoginRequest): DemoAuthSession | null {
+  if (payload.password !== "admin123") return null;
+  const email = payload.email.trim().toLowerCase();
+  if (email === "admin@privexa.co") {
+    return {
+      token: "offline-demo-platform-admin",
+      email: "admin@privexa.co",
+      name: "Privexa Super Admin",
+      role: "platform_admin",
+      organisation_id: null,
+      default_route: "/admin",
+      demo_mode: true,
+    };
+  }
+  if (email === "test@privexa.co") {
+    return {
+      token: "offline-demo-org-admin",
+      email: "test@privexa.co",
+      name: "Test Organisation Admin",
+      role: "organisation_admin",
+      organisation_id: DEFAULT_DEMO_ORG_ID,
+      default_route: "/dashboard",
+      demo_mode: true,
+    };
+  }
+  return null;
 }
 
 export async function logoutDemo(): Promise<void> {
